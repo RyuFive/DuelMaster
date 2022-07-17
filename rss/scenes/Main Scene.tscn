@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://rss/gradienttexture/new_gradienttexture.tres" type="Texture" id=1]
+
+[node name="Main Menu" type="Node2D"]
+
+[node name="NewGradienttexture" type="Polygon2D" parent="."]
+scale = Vector2( 0.5, 600 )
+texture = ExtResource( 1 )
+polygon = PoolVector2Array( 0, 0, 2048, 0, 2048, 0.506667, 2048, 1, 0, 1 )
