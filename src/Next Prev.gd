@@ -25,4 +25,4 @@ func _on_PrevButton_button_up():
 
 func update():
 	CardName.text = game_data.cards[current_card_counter].name
-	card.details(game_data.cards[current_card_counter])
+	card.data = game_data.cards[current_card_counter]

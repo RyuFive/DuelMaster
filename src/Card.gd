@@ -6,7 +6,10 @@ onready var card_cost := $Cost
 onready var card_power := $Power
 onready var card_civ := $Civ
 
+var data
+
 func _ready():
+	details(data)
 	pass
 	
 func details(card_data):
