@@ -27,7 +27,7 @@ func _ready():
 	loadcards()
 	print(current_card_counter)
 #	file_data.cards[0].name
-	get_node("CardName").text = file_data.cards[current_card_counter].name
+	get_node("Center/VBox/CardName").text = file_data.cards[current_card_counter].name
 #	for card in file_data.cards:
 #		print(card.name)
 
@@ -36,7 +36,7 @@ func _on_Button_button_up():
 	current_card_counter += 1
 	if current_card_counter == 1152:
 		current_card_counter = 0
-	get_node("CardName").text = file_data.cards[current_card_counter].name
+	get_node("Center/VBox/CardName").text = file_data.cards[current_card_counter].name
 	pass # Replace with function body.
 
 
@@ -44,5 +44,5 @@ func _on_PrevButton_button_up():
 	current_card_counter -= 1
 	if current_card_counter == 0:
 		current_card_counter = 1151
-	get_node("CardName").text = file_data.cards[current_card_counter].name
+	get_node("Center/VBox/CardName").text = file_data.cards[current_card_counter].name
 	pass # Replace with function body.
