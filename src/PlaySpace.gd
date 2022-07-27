@@ -3,7 +3,6 @@ extends Node2D
 # Loading Data
 onready var CardDatabase = preload("res://data/CardDatabase.gd")
 const CardBase = preload("res://scenes/CardBase.tscn")
-const Popup = preload("res://scenes/Popup.tscn")
 const Deck = preload("res://data/decks/sample_deck.gd")
 
 # Preparing Board
@@ -34,10 +33,24 @@ func hand2monster(card):
 		$Cards/HBox.remove_child(card)
 		$Monster1/HBox.add_child(card)
 
+func hand2grave(card):
+	$Cards/HBox.remove_child(card)
+	card.visible = false
+	$Grave1/Graveyard.add_child(card)
+
 func removePopup():
-	$Cards/Popup.remove_child($Cards/Popup.get_child(0))
+	if $Cards/Popup.get_children():
+		$Cards/Popup.remove_child($Cards/Popup.get_child(0))
+	if $Monster1/Popup.get_children():
+		$Monster1/Popup.remove_child($Monster1/Popup.get_child(0))
 
 func _on_Button_gui_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT and event.pressed:
 			removePopup()
+
+
+func _on_ExitButton_gui_input(event):
+	if event is InputEventMouseButton:
+		if event.button_index == BUTTON_LEFT and event.pressed:
+			get_tree().quit()

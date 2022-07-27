@@ -5,4 +5,5 @@ func _process(delta):
 
 func _gui_input(event):
 	if Input.is_action_just_pressed("leftclick"):
+		$'../../'.removePopup()
 		pass
