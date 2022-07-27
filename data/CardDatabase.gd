@@ -1,4 +1,4 @@
-{
+const DATA = {
   "cards": [
 	{
 	  "civilizations": [
@@ -25227,7 +25227,7 @@
 		"Fire"
 	  ],
 	  "cost": 7,
-	  "name": "\u00c3\u0153berdragon Bajula",
+	  "name": "Überdragon Bajula",
 	  "power": "13000",
 	  "printings": [
 		{

@@ -1,4 +1,4 @@
-extends Node2D
+extends MarginContainer
 
 onready var card_name := $Name
 onready var card_text := $Text

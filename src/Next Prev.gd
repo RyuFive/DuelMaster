@@ -1,6 +1,6 @@
 extends Node
 
-onready var game_data = Startup.game_data
+onready var CardDatabase = preload("res://data/CardDatabase.gd")
 onready var CardName = $Center/VBox/CardName
 
 var current_card_counter := 0
@@ -24,5 +24,5 @@ func _on_PrevButton_button_up():
 	update()
 
 func update():
-	CardName.text = game_data.cards[current_card_counter].name
-	card.data = game_data.cards[current_card_counter]
+	CardName.text = CardDatabase.DATA.cards[current_card_counter].name
+	card.data = CardDatabase.DATA.cards[current_card_counter]

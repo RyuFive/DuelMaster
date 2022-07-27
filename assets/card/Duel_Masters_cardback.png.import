@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Duel_Masters_cardback.jpg-153d2f6b414ae718906cecee8996771a.stex"
+path="res://.import/Duel_Masters_cardback.png-cb15edf7087357d118b4874efa806099.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/card/Duel_Masters_cardback.jpg"
-dest_files=[ "res://.import/Duel_Masters_cardback.jpg-153d2f6b414ae718906cecee8996771a.stex" ]
+source_file="res://assets/card/Duel_Masters_cardback.png"
+dest_files=[ "res://.import/Duel_Masters_cardback.png-cb15edf7087357d118b4874efa806099.stex" ]
 
 [params]
 
