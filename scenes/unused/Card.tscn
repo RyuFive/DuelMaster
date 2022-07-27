@@ -2,7 +2,7 @@
 
 [ext_resource path="res://assets/fonts/ARIAL.TTF" type="DynamicFontData" id=1]
 [ext_resource path="res://assets/fonts/Perceval-Bold.otf" type="DynamicFontData" id=2]
-[ext_resource path="res://src/Card.gd" type="Script" id=3]
+[ext_resource path="res://src/unused/Card.gd" type="Script" id=3]
 
 [sub_resource type="DynamicFont" id=2]
 size = 21

@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://assets/fonts/Perceval-Bold.otf" type="DynamicFontData" id=1]
+
+[sub_resource type="DynamicFont" id=1]
+size = 40
+font_data = ExtResource( 1 )
+
+[node name="VBox" type="VBoxContainer"]
+margin_right = 177.0
+margin_bottom = 248.0
+rect_min_size = Vector2( 177, 248 )
+custom_constants/separation = 0
+
+[node name="TopBar" type="MarginContainer" parent="."]
+margin_right = 177.0
+margin_bottom = 70.0
+rect_min_size = Vector2( 0, 70 )
+mouse_filter = 2
+size_flags_horizontal = 3
+
+[node name="Number" type="Label" parent="."]
+margin_top = 70.0
+margin_right = 177.0
+margin_bottom = 248.0
+rect_min_size = Vector2( 177, 178 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 1 )
+align = 1
+valign = 1

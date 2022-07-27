@@ -1,14 +1,16 @@
 extends TextureButton
 
-
-var DeckSize = INF
+var DeckSize = 40
 
 func _ready():
-	pass
+	$DeckSize/Number.text = str(DeckSize)
 
 func _gui_input(event):
-	if Input.is_action_just_pressed("leftclick"):
-		if DeckSize > 0:
-			DeckSize = $'../../'.drawcard()
-			if DeckSize == 0:
-				disabled = true
+	if event is InputEventMouseButton:
+		if event.button_index == BUTTON_LEFT and event.pressed:
+			if DeckSize > 0:
+				DeckSize = $'../../'.drawcard()
+				$'../../'.removePopup()
+				$DeckSize/Number.text = str(DeckSize)
+				if DeckSize == 0:
+					disabled = true
