@@ -1,17 +1,23 @@
 extends MarginContainer
 
+onready var root = get_node("/root/Playspace")
+onready var monster = get_node("../../../Monster1/HBox")
+
 var options = ['Summon', 'Cast', 'Attack', 'Send to Mana']
 var methods = ['summon', 'cast', 'attack', 'mana']
 var card
 
 func _ready():
-	if str(card.get_parent().get_parent()).find('Monster') > -1:
+	var source = str(get_node('../../'))
+	
+	var type = card.cardData.type
+	if 'Monster' in source:
 		removeOption([3, 1, 0])
-	elif card.cardData.type == 'Spell' and str(card.get_parent().get_parent()).find('Card') > -1:
+	elif type == 'Spell' and 'Hand' in source:
 		removeOption([2, 0])
-	elif card.cardData.type == 'Creature' and str(card.get_parent().get_parent()).find('Card') > -1:
+	elif type == 'Creature' and 'Hand' in source:
 		removeOption([2, 1])
-		if get_node('../../../Monster1/HBox').get_child_count() == 5:
+		if monster.get_child_count() == 5:
 			removeOption([0])
 		
 	rect_size = Vector2(176, int(len(options)/4)*160)
@@ -28,22 +34,18 @@ func _ready():
 		$BG/VBox.get_child(i).visible = true
 
 func summon():
-	$'../../../'.hand2monster(card)
-	print('Summoned ', card.cardName)
+	root.hand2monster(card)
 	removeSelf()
 
 func cast():
-	$'../../../'.hand2grave(card)
-	print('Casting ', card.cardName)
+	root.hand2grave(card)
 	removeSelf()
 
 func attack():
-	print('Attacking with ', card.cardName)
 	removeSelf()
 
 func mana():
-	$'../../../'.hand2mana(card)
-	print('Sending ', card.cardName, ' to mana')
+	root.hand2mana(card)
 	removeSelf()
 
 func removeSelf():
