@@ -1,10 +1,10 @@
-extends TextureButton
+extends Control
 
 onready var root = get_node("/root/Playspace")
-onready var grave = get_node("/root/Playspace/Grave1/Graveyard")
+onready var mana = get_node("Mana")
 
 func _process(delta):
-	$GraveSize/Number.text = str(grave.get_child_count())
+	$ManaButton/ManaSize/Number.text = str(mana.get_child_count())
 
 func _gui_input(event):
 	if Input.is_action_just_pressed("leftclick"):

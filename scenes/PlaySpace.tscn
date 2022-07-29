@@ -1,13 +1,14 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://src/PlaySpace.gd" type="Script" id=1]
-[ext_resource path="res://scenes/Deck.tscn" type="PackedScene" id=2]
-[ext_resource path="res://scenes/Mana.tscn" type="PackedScene" id=3]
-[ext_resource path="res://scenes/Shield.tscn" type="PackedScene" id=4]
-[ext_resource path="res://scenes/Hand.tscn" type="PackedScene" id=5]
-[ext_resource path="res://scenes/Monster.tscn" type="PackedScene" id=6]
-[ext_resource path="res://scenes/Grave.tscn" type="PackedScene" id=7]
+[ext_resource path="res://scenes/components/Deck.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/components/Mana.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/components/Shield.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scenes/components/Hand.tscn" type="PackedScene" id=5]
+[ext_resource path="res://scenes/components/Monster.tscn" type="PackedScene" id=6]
+[ext_resource path="res://scenes/components/Grave.tscn" type="PackedScene" id=7]
 [ext_resource path="res://assets/zone/duel-master-back.png" type="Texture" id=8]
+[ext_resource path="res://src/ChatRoom.gd" type="Script" id=9]
 
 [sub_resource type="Gradient" id=1]
 colors = PoolColorArray( 0.0666667, 0.109804, 0.494118, 0, 0, 0, 0, 0 )
@@ -119,5 +120,61 @@ margin_right = 1791.0
 margin_bottom = 263.0
 rect_rotation = 180.0
 
+[node name="ChatRoom" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 9 )
+
+[node name="RoomUI" type="Panel" parent="ChatRoom"]
+margin_right = 1920.0
+margin_bottom = 1080.0
+
+[node name="ChatInput" type="LineEdit" parent="ChatRoom/RoomUI"]
+margin_left = 15.0
+margin_top = 366.0
+margin_right = 623.0
+margin_bottom = 402.0
+
+[node name="ChatDisplay" type="TextEdit" parent="ChatRoom/RoomUI"]
+margin_left = 15.0
+margin_top = 18.0
+margin_right = 623.0
+margin_bottom = 358.0
+readonly = true
+show_line_numbers = true
+
+[node name="SetUp" type="Control" parent="ChatRoom"]
+margin_left = 650.0
+margin_top = 172.0
+margin_right = 690.0
+margin_bottom = 212.0
+
+[node name="HostButton" type="Button" parent="ChatRoom/SetUp"]
+margin_right = 100.0
+margin_bottom = 50.0
+text = "Host"
+
+[node name="JoinButton" type="Button" parent="ChatRoom/SetUp"]
+margin_top = 60.0
+margin_right = 100.0
+margin_bottom = 110.0
+text = "Join"
+
+[node name="LeaveButton" type="Button" parent="ChatRoom/SetUp"]
+margin_top = 120.0
+margin_right = 100.0
+margin_bottom = 170.0
+text = "Leave"
+
+[node name="IpEnter" type="LineEdit" parent="ChatRoom/SetUp"]
+margin_top = 180.0
+margin_right = 100.0
+margin_bottom = 230.0
+text = "127.0.0.1"
+align = 1
+
 [connection signal="gui_input" from="BG2" to="." method="_on_BG_gui_input"]
 [connection signal="gui_input" from="Exit/ExitButton" to="." method="_on_ExitButton_gui_input"]
+[connection signal="button_up" from="ChatRoom/SetUp/HostButton" to="ChatRoom" method="host_room"]
+[connection signal="button_up" from="ChatRoom/SetUp/JoinButton" to="ChatRoom" method="join_room"]
+[connection signal="button_up" from="ChatRoom/SetUp/LeaveButton" to="ChatRoom" method="leave_room"]

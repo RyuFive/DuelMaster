@@ -3,7 +3,7 @@
 [node name="Hand" type="Control"]
 mouse_filter = 2
 
-[node name="HBox" type="HBoxContainer" parent="."]
+[node name="Cards" type="HBoxContainer" parent="."]
 margin_right = 2515.0
 rect_min_size = Vector2( 2515, 0 )
 rect_scale = Vector2( 0.66, 0.66 )

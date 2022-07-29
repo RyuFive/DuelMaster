@@ -1,17 +1,17 @@
 [gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://src/ManaButton.gd" type="Script" id=1]
-[ext_resource path="res://scenes/CardNumber.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/Mana.gd" type="Script" id=1]
+[ext_resource path="res://scenes/components/CardNumber.tscn" type="PackedScene" id=2]
 [ext_resource path="res://assets/card/Duel_Masters_cardback.png" type="Texture" id=3]
 
 [node name="Mana" type="Control"]
+script = ExtResource( 1 )
 
 [node name="ManaButton" type="TextureButton" parent="."]
 margin_right = 177.0
 margin_bottom = 248.0
 texture_normal = ExtResource( 3 )
 expand = true
-script = ExtResource( 1 )
 
 [node name="ManaSize" parent="ManaButton" instance=ExtResource( 2 )]
 anchor_right = 1.0

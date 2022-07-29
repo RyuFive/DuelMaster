@@ -1,9 +1,9 @@
 extends MarginContainer
 
 onready var root = get_node("/root/Playspace")
-onready var hand = get_node("/root/Playspace/Hand1/Popup")
-onready var monster = get_node("/root/Playspace/Monster1/Popup")
-const Popup = preload("res://scenes/Popup.tscn")
+onready var handPopup = get_node("/root/Playspace/Hand1/Popup")
+onready var monsterPopup = get_node("/root/Playspace/Monster1/Popup")
+const Popup = preload("res://scenes/Popupv2.tscn")
 
 var cardName = ""
 var cardData = ""
@@ -22,7 +22,6 @@ func _ready():
 func _gui_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT and event.pressed:
-			root.removePopup()
 			if !cardData:
 				return
 			var source = str(get_node('../../'))
@@ -31,8 +30,6 @@ func _gui_input(event):
 			temp.card = self
 			
 			if 'Hand' in source:
-				hand.add_child(temp)
+				handPopup.add_child(temp)
 			elif 'Monster' in source:
-				monster.add_child(temp)
-				
-			temp.rect_position = get_global_mouse_position()
+				monsterPopup.add_child(temp)

@@ -1,7 +1,7 @@
 extends MarginContainer
 
 onready var root = get_node("/root/Playspace")
-onready var monster = get_node("../../../Monster1/HBox")
+onready var monster = get_node("../../../Monster1/Cards")
 
 var options = ['Summon', 'Cast', 'Attack', 'Send to Mana']
 var methods = ['summon', 'cast', 'attack', 'mana']
