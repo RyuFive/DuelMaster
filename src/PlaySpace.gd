@@ -10,31 +10,39 @@ onready var mana = get_node("Mana1/Mana")
 onready var grave = get_node("Grave1/Graveyard")
 onready var monster = get_node("Monster1/Cards")
 onready var hand = get_node("Hand1/Cards")
+onready var coms = get_node("Coms")
 
 # Preparing Vars
+
+var id
 var Deck1 = Deck.DATA.cards.duplicate(true)
-var p2state = {}
+var p2state = {
+	'hand' : 0,
+	'deck' : 40,
+	'shield' : 0,
+	'monster' : null,
+	'grave' : null,
+	'mana' : null
+	}
 
 func _ready():
 	randomize()
-	Deck1.shuffle()
-	deck.DeckSize = deck2shield(5)
-	deck.DeckSize = drawCard(5)
 	
 	#Setting up Player 2's side
-	$Shield2.shield = get_node(str("/root/Playspace/Shield2/Shield"))
-	$Mana2.mana = get_node(str("/root/Playspace/Mana2/Mana"))
-	$Grave2.grave = get_node(str("/root/Playspace/Grave2/Graveyard"))
+	p2state['monster'] = get_node("Monster2/Cards")
 
 func drawCard(num):
 	for i in num:
 		var new_card = CardBase.instance()
 		new_card.cardData = Deck1.pop_at(0)
+		coms.updateP2('deckMil', null)
 		if hand.get_child_count() >= 9:
 			new_card.visible = false
 			grave.add_child(new_card)
+			coms.updateP2('graveCard', new_card.cardData)
 		else:
 			hand.add_child(new_card)
+			coms.updateP2('drawCard', null)
 	return len(Deck1)
 
 func deck2shield(num):
@@ -46,15 +54,17 @@ func deck2shield(num):
 			grave.add_child(new_card)
 		else:
 			shield.add_child(new_card)
-			var shield = TextureRect.new()
-			shield.texture = load("res://assets/zone/shield.png")
-			get_node("/root/Playspace/Shield1/ShieldGrid").add_child(shield)
+			var shieldTexture = TextureRect.new()
+			shieldTexture.texture = load("res://assets/zone/shield.png")
+			get_node("/root/Playspace/Shield1/ShieldGrid").add_child(shieldTexture)
 	return len(Deck1)
 
 func hand2mana(card):
 	hand.remove_child(card)
+	coms.updateP2('handMil', null)
 	card.visible = false
 	mana.add_child(card)
+	coms.updateP2('addMana', null)
 
 func hand2monster(card):
 	if monster.get_child_count() < 5:
@@ -92,9 +102,9 @@ func receiveState():
 	for child in get_node("/root/Playspace/Shield2/ShieldGrid").get_children():
 		child.free()
 	for i in p2state.shield:
-		var shield = TextureRect.new()
-		shield.texture = load("res://assets/zone/shield.png")
-		get_node("/root/Playspace/Shield2/ShieldGrid").add_child(shield)
+		var shieldTexture = TextureRect.new()
+		shieldTexture.texture = load("res://assets/zone/shield.png")
+		get_node("/root/Playspace/Shield2/ShieldGrid").add_child(shieldTexture)
 		var card = CardBase.instance()
 		card.visible = false
 		get_node("/root/Playspace/Shield2/Shield").add_child(card)
@@ -106,34 +116,6 @@ func receiveState():
 		var new_card = CardBase.instance()
 		new_card.cardData = card.cardData
 		get_node("/root/Playspace/Monster2/Cards").add_child(new_card)
-
-	#Deck
-	if (p2state.deck >= 0):
-		$Deck2.DeckSize = p2state.deck
-		$Deck2/DeckBack/DeckSize/Number.text = str(p2state.deck)
-
-	#Grave
-	for child in get_node("/root/Playspace/Grave2/Graveyard").get_children():
-		child.free()
-	for i in p2state.grave:
-		var card = CardBase.instance()
-		card.visible = false
-		get_node("/root/Playspace/Grave2/Graveyard").add_child(card)
-
-	#Mana
-	for child in get_node("/root/Playspace/Mana2/Mana").get_children():
-		child.free()
-	for i in p2state.mana:
-		var card = CardBase.instance()
-		card.visible = false
-		get_node("/root/Playspace/Mana2/Mana").add_child(card)
-
-	#Hand
-	for child in get_node("/root/Playspace/Hand2/Cards").get_children():
-		child.free()
-	for i in p2state.hand:
-		var card = CardBase.instance()
-		get_node("/root/Playspace/Hand2/Cards").add_child(card)
 
 func removePopup():
 	for popup in $Hand1/Popup.get_children():

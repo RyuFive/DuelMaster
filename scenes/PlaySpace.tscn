@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://src/PlaySpace.gd" type="Script" id=1]
 [ext_resource path="res://scenes/components/Deck.tscn" type="PackedScene" id=2]
@@ -9,6 +9,7 @@
 [ext_resource path="res://scenes/components/Grave.tscn" type="PackedScene" id=7]
 [ext_resource path="res://assets/zone/duel-master-back.png" type="Texture" id=8]
 [ext_resource path="res://src/ChatRoom.gd" type="Script" id=9]
+[ext_resource path="res://assets/fonts/ARIAL.TTF" type="DynamicFontData" id=10]
 
 [sub_resource type="Gradient" id=1]
 colors = PoolColorArray( 0.0666667, 0.109804, 0.494118, 0, 0, 0, 0, 0 )
@@ -16,6 +17,26 @@ colors = PoolColorArray( 0.0666667, 0.109804, 0.494118, 0, 0, 0, 0, 0 )
 [sub_resource type="GradientTexture" id=2]
 gradient = SubResource( 1 )
 width = 40
+
+[sub_resource type="DynamicFont" id=6]
+size = 50
+font_data = ExtResource( 10 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 100
+font_data = ExtResource( 10 )
+
+[sub_resource type="DynamicFont" id=7]
+size = 35
+font_data = ExtResource( 10 )
+
+[sub_resource type="DynamicFont" id=5]
+size = 100
+font_data = ExtResource( 10 )
+
+[sub_resource type="DynamicFont" id=8]
+size = 20
+font_data = ExtResource( 10 )
 
 [node name="Playspace" type="Node2D"]
 position = Vector2( 0, 3 )
@@ -38,6 +59,7 @@ margin_bottom = 1028.0
 rect_scale = Vector2( 2.45634, 1.86798 )
 
 [node name="ExitButton" type="TextureRect" parent="Exit"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 texture = SubResource( 2 )
@@ -105,6 +127,7 @@ margin_top = 532.0
 margin_right = 493.0
 margin_bottom = 532.0
 rect_rotation = 180.0
+script = null
 
 [node name="Monster2" parent="." instance=ExtResource( 6 )]
 margin_left = 1420.0
@@ -120,61 +143,65 @@ margin_right = 1791.0
 margin_bottom = 263.0
 rect_rotation = 180.0
 
-[node name="ChatRoom" type="Control" parent="."]
+[node name="Coms" type="Control" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 9 )
 
-[node name="RoomUI" type="Panel" parent="ChatRoom"]
+[node name="RoomUI" type="Panel" parent="Coms"]
 margin_right = 1920.0
 margin_bottom = 1080.0
 
-[node name="ChatInput" type="LineEdit" parent="ChatRoom/RoomUI"]
-margin_left = 15.0
-margin_top = 366.0
-margin_right = 623.0
-margin_bottom = 402.0
-
-[node name="ChatDisplay" type="TextEdit" parent="ChatRoom/RoomUI"]
-margin_left = 15.0
-margin_top = 18.0
-margin_right = 623.0
-margin_bottom = 358.0
+[node name="ChatDisplay" type="TextEdit" parent="Coms/RoomUI"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = SubResource( 6 )
 readonly = true
-show_line_numbers = true
 
-[node name="SetUp" type="Control" parent="ChatRoom"]
-margin_left = 650.0
-margin_top = 172.0
-margin_right = 690.0
-margin_bottom = 212.0
+[node name="ChatInput" type="LineEdit" parent="Coms/RoomUI"]
+visible = false
+margin_right = 58.0
+margin_bottom = 24.0
 
-[node name="HostButton" type="Button" parent="ChatRoom/SetUp"]
-margin_right = 100.0
-margin_bottom = 50.0
+[node name="SetUp" type="Control" parent="Coms"]
+
+[node name="HostButton" type="Button" parent="Coms/SetUp"]
+margin_left = 340.0
+margin_top = 440.0
+margin_right = 640.0
+margin_bottom = 640.0
+custom_fonts/font = SubResource( 3 )
 text = "Host"
 
-[node name="JoinButton" type="Button" parent="ChatRoom/SetUp"]
-margin_top = 60.0
-margin_right = 100.0
-margin_bottom = 110.0
-text = "Join"
-
-[node name="LeaveButton" type="Button" parent="ChatRoom/SetUp"]
-margin_top = 120.0
-margin_right = 100.0
-margin_bottom = 170.0
-text = "Leave"
-
-[node name="IpEnter" type="LineEdit" parent="ChatRoom/SetUp"]
-margin_top = 180.0
-margin_right = 100.0
-margin_bottom = 230.0
+[node name="IpEnter" type="LineEdit" parent="Coms/SetUp"]
+margin_left = 830.0
+margin_top = 440.0
+margin_right = 1130.0
+margin_bottom = 640.0
+custom_fonts/font = SubResource( 7 )
 text = "127.0.0.1"
 align = 1
 
+[node name="JoinButton" type="Button" parent="Coms/SetUp"]
+margin_left = 1320.0
+margin_top = 440.0
+margin_right = 1620.0
+margin_bottom = 640.0
+custom_fonts/font = SubResource( 5 )
+text = "Join"
+
+[node name="LeaveButton" type="Button" parent="Coms/SetUp"]
+visible = false
+margin_left = 21.0
+margin_top = 988.0
+margin_right = 87.0
+margin_bottom = 1028.0
+rect_min_size = Vector2( 40, 40 )
+custom_fonts/font = SubResource( 8 )
+text = "Leave"
+
 [connection signal="gui_input" from="BG2" to="." method="_on_BG_gui_input"]
 [connection signal="gui_input" from="Exit/ExitButton" to="." method="_on_ExitButton_gui_input"]
-[connection signal="button_up" from="ChatRoom/SetUp/HostButton" to="ChatRoom" method="host_room"]
-[connection signal="button_up" from="ChatRoom/SetUp/JoinButton" to="ChatRoom" method="join_room"]
-[connection signal="button_up" from="ChatRoom/SetUp/LeaveButton" to="ChatRoom" method="leave_room"]
+[connection signal="button_up" from="Coms/SetUp/HostButton" to="Coms" method="host_room"]
+[connection signal="button_up" from="Coms/SetUp/JoinButton" to="Coms" method="join_room"]
+[connection signal="button_up" from="Coms/SetUp/LeaveButton" to="Coms" method="leave_room"]
