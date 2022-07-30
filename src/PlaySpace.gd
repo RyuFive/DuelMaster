@@ -13,138 +13,111 @@ onready var hand = get_node("Hand1/Cards")
 onready var coms = get_node("Coms")
 
 # Preparing Vars
-
-var id
 var Deck1 = Deck.DATA.cards.duplicate(true)
-var p2state = {
-	'hand' : 0,
-	'deck' : 40,
-	'shield' : 0,
-	'monster' : null,
-	'grave' : null,
-	'mana' : null
-	}
+var id
 
 func _ready():
 	randomize()
-	
-	#Setting up Player 2's side
-	p2state['monster'] = get_node("Monster2/Cards")
+
+func initialize():
+	Deck1.shuffle()
+	$Deck1.DeckSize = deck2shield(5)
+	$Deck1.DeckSize = drawCard(5)
 
 func drawCard(num):
 	for i in num:
-		var new_card = CardBase.instance()
-		new_card.cardData = Deck1.pop_at(0)
-		coms.updateP2('deckMil', null)
+		var data = Deck1.pop_at(0)
+		coms.rpc('deckMil', id, null)
 		if hand.get_child_count() >= 9:
-			new_card.visible = false
-			grave.add_child(new_card)
-			coms.updateP2('graveCard', new_card.cardData)
+			grave.add_child(createCard(data, false))
+			coms.rpc('addGrave', id, data)
 		else:
-			hand.add_child(new_card)
-			coms.updateP2('drawCard', null)
+			hand.add_child(createCard(data, true))
+			coms.rpc('addHand', id, null)
 	return len(Deck1)
 
 func deck2shield(num):
 	for i in num:
-		var new_card = CardBase.instance()
-		new_card.cardData = Deck1.pop_at(0)
-		new_card.visible = false
+		var node = get_node("/root/Playspace/Shield1/ShieldGrid")
+		var data = Deck1.pop_at(0)
+		coms.rpc('deckMil', id, null)
 		if shield.get_child_count() >= 10:
-			grave.add_child(new_card)
+			grave.add_child(createCard(data, false))
+			coms.rpc('addGrave', id, data)
 		else:
-			shield.add_child(new_card)
+			shield.add_child(createCard(data, false))
+			coms.rpc('addShield', id, data)
 			var shieldTexture = TextureRect.new()
 			shieldTexture.texture = load("res://assets/zone/shield.png")
-			get_node("/root/Playspace/Shield1/ShieldGrid").add_child(shieldTexture)
+			node.add_child(shieldTexture)
 	return len(Deck1)
 
 func hand2mana(card):
 	hand.remove_child(card)
-	coms.updateP2('handMil', null)
+	coms.rpc('handMil', id, null)
 	card.visible = false
 	mana.add_child(card)
-	coms.updateP2('addMana', null)
+	coms.rpc('addMana', id, null)
 
 func hand2monster(card):
 	if monster.get_child_count() < 5:
 		hand.remove_child(card)
+		coms.rpc('handMil', id, null)
 		monster.add_child(card)
+		coms.rpc('addMonster', id, card.cardData)
 
 func hand2grave(card):
 	hand.remove_child(card)
+	coms.rpc('handMil', id, null)
 	card.visible = false
 	grave.add_child(card)
+	coms.rpc('addGrave', id, card.cardData)
 	
 func monster2grave(card):
 	monster.remove_child(card)
+	coms.rpc('removeMonster', id, card.cardData)
 	card.visible = false
 	grave.add_child(card)
+	coms.rpc('addGrave', id, card.cardData)
 
-func getState():
-	var data = {}
-	
-	data['hand'] = hand.get_child_count()
-	data['deck'] = deck.DeckSize
-	data['monster'] = monster
-	data['shield'] = shield.get_child_count()
-	data['grave'] = grave.get_child_count()
-	data['mana'] = mana.get_child_count()
-	
-	return(data)
+func shield2grave(card):
+	var shield2 = get_node("Shield2/Shield")
+	var grave2 = get_node("Grave2/Graveyard")
+	shield2.get_child(0).queue_free()
+	coms.rpc('loseShield', id, card.cardData)
+	# This is creating the wrong card in opponents grave
+	grave2.add_child(card)
 
-func receiveState():
-	p2state = getState()
-	
-	#Shield
-	for child in get_node("/root/Playspace/Shield2/Shield").get_children():
-		child.free()
-	for child in get_node("/root/Playspace/Shield2/ShieldGrid").get_children():
-		child.free()
-	for i in p2state.shield:
-		var shieldTexture = TextureRect.new()
-		shieldTexture.texture = load("res://assets/zone/shield.png")
-		get_node("/root/Playspace/Shield2/ShieldGrid").add_child(shieldTexture)
-		var card = CardBase.instance()
-		card.visible = false
-		get_node("/root/Playspace/Shield2/Shield").add_child(card)
+func fight(one, two):
+	var green = one.cardData.power
+	var red = two.cardData.power
+	if green > red:
+		coms.rpc("loseMonster", id, two.cardData)
+		two.queue_free()
+	elif green < red:
+		monster2grave(one)
+	elif green == red:
+		monster2grave(one)
+		coms.rpc("loseMonster", id, two.cardData)
+		two.queue_free()
 
-	#Monster
-	for child in get_node("/root/Playspace/Monster2/Cards").get_children():
-		child.free()
-	for card in p2state.monster.get_children():
-		var new_card = CardBase.instance()
-		new_card.cardData = card.cardData
-		get_node("/root/Playspace/Monster2/Cards").add_child(new_card)
-
-func removePopup():
-	for popup in $Hand1/Popup.get_children():
-		popup.free()
-	for popup in $Monster1/Popup.get_children():
-		popup.free()
-
-func _on_BG_gui_input(event):
-	if event is InputEventMouseButton:
-		if event.button_index == BUTTON_LEFT and event.pressed:
-			removePopup()
+func createCard(cardData, vis):
+	var new_card = CardBase.instance()
+	new_card.cardData = cardData
+	new_card.visible = vis
+	return(new_card)
 
 func _on_ExitButton_gui_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT and event.pressed:
 			get_tree().quit()
-			
+
 func _input(event):
 	if Input.is_action_pressed("quit"):
 		get_tree().quit()
-	if Input.is_action_pressed("copy"):
-		receiveState()
 	if Input.is_action_pressed('k'):
-		var peer = NetworkedMultiplayerENet.new()
-		peer.create_server(9999, 1)
-		get_tree().network_peer = peer
-		print("Room Created\n")
+		pass
+	if Input.is_action_pressed('p'):
+		coms.hide()
 	if Input.is_action_pressed('l'):
-		var peer = NetworkedMultiplayerENet.new()
-		peer.create_client('localhost', 9999)
-		get_tree().network_peer = peer
-		print("Successfully Joined Room\n")
+		pass

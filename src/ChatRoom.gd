@@ -1,12 +1,12 @@
 extends Control
 
-const PORT = 3000
-const MAX_USERS = 1 #not including host
-
 const CardBase = preload("res://scenes/CardBase.tscn")
 onready var root = get_node("/root/Playspace")
 onready var chat_display = $RoomUI/ChatDisplay
 onready var chat_input = $RoomUI/ChatInput
+
+const PORT = 3000
+const MAX_USERS = 1 #not including host
 var id
 
 func _ready():
@@ -16,22 +16,16 @@ func _ready():
 	get_tree().connect("server_disconnected", self, "_server_disconnected")
 
 func _server_disconnected():
-	chat_display.text += "Disconnected from Server\n"
 	leave_room()
 	get_tree().quit()
 
 func user_entered(p2id):
-	chat_display.text += str(p2id) + " joined the room\n"
 	id = get_tree().get_network_unique_id()
 	root.id = id
 	self.hide()
-	
-	root.Deck1.shuffle()
-	$'../Deck1'.DeckSize = root.deck2shield(5)
-	$'../Deck1'.DeckSize = root.drawCard(5)
+	root.initialize()
 
 func user_exited(p2id):
-	chat_display.text += str(p2id) + " left the room\n"
 	get_tree().quit()
 
 func host_room():
@@ -39,7 +33,6 @@ func host_room():
 	host.create_server(PORT, MAX_USERS)
 	get_tree().set_network_peer(host)
 	enter_room()
-	chat_display.text = "Room Created\n"
 
 func join_room():
 	var ip = $SetUp/IpEnter.text
@@ -48,7 +41,7 @@ func join_room():
 	get_tree().set_network_peer(host)
 
 func enter_room():
-	chat_display.text = "Successfully joined room\n"
+	chat_display.text = "Successfully joined room\nWaiting for connection..."
 	$SetUp/LeaveButton.show()
 	$SetUp/JoinButton.hide()
 	$SetUp/HostButton.hide()
@@ -57,52 +50,86 @@ func enter_room():
 func leave_room():
 	get_tree().set_network_peer(null)
 	chat_display.text += "Left Room\n"
-	
 	$SetUp/LeaveButton.hide()
 	$SetUp/JoinButton.show()
 	$SetUp/HostButton.show()
 	$SetUp/IpEnter.show()
 
-#func send_message():
-#	var msg = chat_input.text
-#	chat_input.text = ""
-#	var id = get_tree().get_network_unique_id()
-#	rpc("receive_message", id, msg)
-#
-#sync func receive_message(id, msg):
-#	chat_display.text += str(id) + ": " + msg + "\n"
-
-func updateP2(command, cardData):
-	rpc(command, id, cardData)
-
-sync func drawCard(p2id, cardData):
+sync func addHand(p2id, cardData):
+	var node = get_node("/root/Playspace/Hand2/Cards")
 	if p2id != id:
-		root.p2state['hand'] += 1
-		var new_card = CardBase.instance()
-		get_node("/root/Playspace/Hand2/Cards").add_child(new_card)
+		node.add_child(root.createCard(null, true))
 
 sync func handMil(p2id, cardData):
+	var node = get_node("/root/Playspace/Hand2/Cards")
 	if p2id != id:
-		root.p2state['hand'] -= 1
-		get_node("/root/Playspace/Hand2/Cards").remove_child(get_node("/root/Playspace/Hand2/Cards").get_child(0))
+		node.get_child(0).queue_free()
 
-sync func graveCard(p2id, cardData):
+sync func addGrave(p2id, cardData):
+	var node = get_node("/root/Playspace/Grave2/Graveyard")
 	if p2id != id:
-		var new_card = CardBase.instance()
-		new_card.cardData = cardData
-		new_card.visible = false
-		get_node("/root/Playspace/Grave2/Graveyard").add_child(new_card)
+		node.add_child(root.createCard(null, false))
 		
 sync func deckMil(p2id, cardData):
+	var node = $'/root/Playspace/Deck2/'
 	if p2id != id:
-		root.p2state['deck'] -= 1
-		$'../Deck2/DeckBack/DeckSize/Number'.text = str(root.p2state['deck'])
-		if root.p2state.deck == 0:
-			$'../Deck2'.hide()
+		node.DeckSize -= 1
 
 sync func addMana(p2id, cardData):
+	var node = get_node("/root/Playspace/Mana2/Mana")
 	if p2id != id:
-		var new_card = CardBase.instance()
-		new_card.cardData = cardData
-		new_card.visible = false
-		get_node("/root/Playspace/Mana2/Mana").add_child(new_card)
+		node.add_child(root.createCard(null, false))
+
+sync func removeMana(p2id, cardData):
+	var node = get_node("/root/Playspace/Mana2/Mana")
+	if p2id != id:
+		for card in node.get_children():
+			if card.cardData.name == cardData.name:
+				node.remove_child(card)
+				break
+
+sync func addShield(p2id, cardData):
+	var node = get_node("/root/Playspace/Shield2/Shield")
+	var node2 = get_node("/root/Playspace/Shield2/ShieldGrid")
+	if p2id != id:
+		node.add_child(root.createCard(cardData, false))
+		var shieldTexture = TextureRect.new()
+		shieldTexture.texture = load("res://assets/zone/shield.png")
+		node2.add_child(shieldTexture)
+
+sync func loseShield(p2id, cardData):
+	var node = get_node("/root/Playspace/Shield1/Shield")
+	var node2 = get_node("/root/Playspace/Shield1/ShieldGrid")
+	var node3 = get_node("/root/Playspace/Hand1/Cards")
+	var node4 = get_node("/root/Playspace/Grave1/Graveyard")
+	var node5 = get_node("/root/Playspace/Grave2/Graveyard")
+	if p2id != id:
+		node2.get_child(0).queue_free()
+		var brokenShield = node.get_child(0)
+		node.remove_child(brokenShield)
+		if node3.get_child_count() < 9:
+			node3.add_child(brokenShield)
+			brokenShield.visible = true
+		else:
+			node4.add_child(brokenShield)
+
+sync func addMonster(p2id, cardData):
+	var node = get_node("/root/Playspace/Monster2/Cards")
+	if p2id != id:
+		node.add_child(root.createCard(cardData, true))
+
+sync func removeMonster(p2id, cardData):
+	var node = get_node("/root/Playspace/Monster2/Cards")
+	if p2id != id:
+		for card in node.get_children():
+			if card.cardData.name == cardData.name:
+				node.remove_child(card)
+				break
+
+sync func loseMonster(p2id, cardData):
+	var node = get_node("/root/Playspace/Monster1/Cards")
+	if p2id != id:
+		for card in node.get_children():
+			if card.cardData.name == cardData.name:
+				node.remove_child(card)
+				break

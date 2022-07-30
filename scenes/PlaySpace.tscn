@@ -42,12 +42,7 @@ font_data = ExtResource( 10 )
 position = Vector2( 0, 3 )
 script = ExtResource( 1 )
 
-[node name="BG2" type="Button" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
-rect_min_size = Vector2( 1920, 1080 )
-
-[node name="BG" type="Sprite" parent="BG2"]
+[node name="BG" type="Sprite" parent="."]
 texture = ExtResource( 8 )
 centered = false
 
@@ -59,7 +54,6 @@ margin_bottom = 1028.0
 rect_scale = Vector2( 2.45634, 1.86798 )
 
 [node name="ExitButton" type="TextureRect" parent="Exit"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 texture = SubResource( 2 )
@@ -127,7 +121,6 @@ margin_top = 532.0
 margin_right = 493.0
 margin_bottom = 532.0
 rect_rotation = 180.0
-script = null
 
 [node name="Monster2" parent="." instance=ExtResource( 6 )]
 margin_left = 1420.0
@@ -200,7 +193,6 @@ rect_min_size = Vector2( 40, 40 )
 custom_fonts/font = SubResource( 8 )
 text = "Leave"
 
-[connection signal="gui_input" from="BG2" to="." method="_on_BG_gui_input"]
 [connection signal="gui_input" from="Exit/ExitButton" to="." method="_on_ExitButton_gui_input"]
 [connection signal="button_up" from="Coms/SetUp/HostButton" to="Coms" method="host_room"]
 [connection signal="button_up" from="Coms/SetUp/JoinButton" to="Coms" method="join_room"]
