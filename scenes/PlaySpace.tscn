@@ -8,7 +8,7 @@
 [ext_resource path="res://scenes/components/Monster.tscn" type="PackedScene" id=6]
 [ext_resource path="res://scenes/components/Grave.tscn" type="PackedScene" id=7]
 [ext_resource path="res://assets/zone/duel-master-back.png" type="Texture" id=8]
-[ext_resource path="res://src/ChatRoom.gd" type="Script" id=9]
+[ext_resource path="res://src/Coms.gd" type="Script" id=9]
 [ext_resource path="res://assets/fonts/ARIAL.TTF" type="DynamicFontData" id=10]
 
 [sub_resource type="Gradient" id=1]

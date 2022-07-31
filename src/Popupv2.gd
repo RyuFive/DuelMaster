@@ -70,7 +70,7 @@ func _on_PopupMenu_id_pressed(id):
 		PopupIds.MANA:
 			root.hand2mana(card)
 		PopupIds.SHIELD:
-			root.shield2grave(card)
+			root.shield2grave()
 		PopupIds.PLAYER:
 			pass
 		PopupIds.MONSTER1:
