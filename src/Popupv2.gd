@@ -17,6 +17,7 @@ const monsters = [PopupIds.MONSTER1, PopupIds.MONSTER2, PopupIds.MONSTER3, Popup
 
 onready var root = get_node("/root/Playspace")
 onready var shield2 = get_node("/root/Playspace/Shield2/Shield")
+onready var mana = get_node("/root/Playspace/Mana1/Mana")
 onready var monster = get_node("/root/Playspace/Monster1/Cards")
 onready var monster2 = get_node("/root/Playspace/Monster2/Cards")
 onready var coms = get_node("/root/Playspace/Coms")
@@ -30,16 +31,32 @@ func _ready():
 	last_mouse_position = get_global_mouse_position()
 	var source = str(get_node('../../'))
 	var category = card.cardData.type
+	var cost = card.cardData.cost
+	var manaCount = 0
+	var manaValid
+	for civ in card.cardData.civilizations:
+		if mana.get_parent().manaCivs[civ]:
+			manaValid = true
+			break
+	
+	for card in mana.get_children():
+		if !card.cardData['tapped']:
+			manaCount += 1
 	
 	if stage1:
 		if 'Monster' in source:
 			menu.add_item("Attack", PopupIds.ATTACK)
 		elif category == 'Spell' and 'Hand' in source:
 			menu.add_item("Add to Mana", PopupIds.MANA)
-			menu.add_item("Cast Spell", PopupIds.CAST)
+			if manaCount >= cost and manaValid:
+				menu.add_item("Cast Spell", PopupIds.CAST)
 		elif category == 'Creature' and 'Hand' in source:
 			menu.add_item("Add to Mana", PopupIds.MANA)
-			if monster.get_child_count() < 5:
+#			if card.cardData.supertypes[0] == "Evolution":
+#				var evolutionValid = false
+#				for tempMonster in monster.get_children():
+#					
+			if monster.get_child_count() < 5 and manaCount >= cost and manaValid:
 				menu.add_item("Summon Creature", PopupIds.SUMMON)
 	else:
 		if shield2.get_child_count() >= 1:
@@ -60,8 +77,10 @@ func _on_PopupMenu_id_pressed(id):
 	match id: # 100,101,102...
 		PopupIds.SUMMON:
 			root.hand2monster(card)
+			root.tapmana(card)
 		PopupIds.CAST:
 			root.hand2grave(card)
+			root.tapmana(card)
 		PopupIds.ATTACK:
 			var temp = instance()
 			temp.stage1 = false

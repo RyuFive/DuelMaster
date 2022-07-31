@@ -1,25 +1,10 @@
 extends Node
 
 
-const spell  = {
-	  "civilizations": [
-		"Water"
-	  ],
-	  "cost": 7,
-	  "name": "Abduction Charger",
-	  "printings": [
-		{
-		  "set": "DM-09 Fatal Brood of Infinite Ruin",
-		  "id": "16/55",
-		  "rarity": "Rare",
-		  "illustrator": "Akifumi Yamamoto",
-		  "flavor": "\"We have learned all we can about these specimens. But just to be sure, let's probe them again.\"",
-		  "image": "https://static.wikia.nocookie.net/duelmasters/images/6/68/AbductionCharger.jpg/revision/latest?cb=20130115213453"
-		}
-	  ],
-	  "text": "Choose up to 2 creatures in the battle zone and return them to their owners' hands.\nCharger (After you cast this spell, put it into your mana zone instead of your graveyard.)",
-	  "type": "Spell"
-	}
+const civ  = [
+		"Gladiator",
+		"Armorloid"
+	  ]
  
 const monster = {
 	  "civilizations": [
@@ -45,7 +30,10 @@ const monster = {
 	}
 
 func _ready():
-	int(rand_range(1,10)*100000000)
+#	int(rand_range(1,10)*100000000)
+#	print('Fire' in civ.civilizations)
+	print(randi() % 2)
+	print("Gladiator" in civ)
 	pass
 
 func merge_array(array_1: Array, array_2: Array, deep_merge: bool = false) -> Array:

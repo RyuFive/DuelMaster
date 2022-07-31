@@ -4,6 +4,7 @@ onready var root = get_node("/root/Playspace")
 onready var handPopup = get_node("/root/Playspace/Hand1/Popup")
 onready var monsterPopup = get_node("/root/Playspace/Monster1/Popup")
 const Popup = preload("res://scenes/Popupv2.tscn")
+const CardViewer = preload("res://scenes/CardViewer.tscn")
 
 var cardName
 var cardData
@@ -20,7 +21,7 @@ func _ready():
 func _gui_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT and event.pressed:
-			if !cardData:
+			if !root.turn:
 				return
 			var source = str(get_node('../../'))
 			

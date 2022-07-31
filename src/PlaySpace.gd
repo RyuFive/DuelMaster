@@ -24,23 +24,24 @@ onready var coms = get_node("Coms")
 var Deck1
 var Deck2
 var peer
+var turn = false
 
 func drawCard(num):
 	for i in num:
-		var card = deck.get_child(0)
+		var card = deck.get_child(i)
 		if hand.get_child_count() >= 9:
 			grave.add_child(createCard(card.cardData))
 			coms.rpc_id( peer, 'addGrave', card.cardData)
 		else:
 			hand.add_child(createCard(card.cardData, true))
 			coms.rpc_id(peer, 'addHand', card.cardData)
-		card.queue_free()
 		coms.rpc_id(peer, 'deckMil')
+		card.queue_free()
 
 func deck2shield(num):
 	for i in num:
 		var shieldGrid = get_node("/root/Playspace/Shield1/ShieldGrid")
-		var card = deck.get_child(0)
+		var card = deck.get_child(i)
 		if shield.get_child_count() >= 10:
 			grave.add_child(createCard(card.cardData))
 			coms.rpc_id(peer, 'addGrave', card.cardData)
@@ -56,6 +57,8 @@ func deck2shield(num):
 func hand2mana(card):
 	coms.rpc_id(peer, 'handMil', card.cardData)
 	mana.add_child(createCard(card.cardData))
+	for civ in card.cardData.civilizations:
+		mana.get_parent().manaCivs[civ] = true
 	coms.rpc_id(peer, 'addMana', card.cardData)
 	card.queue_free()
 
@@ -81,10 +84,22 @@ func shield2grave():
 	var card = shield2.get_child(0)
 	coms.rpc_id(peer, 'loseShield', card.cardData)
 	if hand2.get_child_count() < 9:
-		hand2.add_child(createCard(card.cardData))
+		hand2.add_child(createCard(card.cardData, true, {'flipped': true}))
 	else:
 		grave2.add_child(createCard(card.cardData))
-	shield2.queue_free()
+	card.queue_free()
+
+func tapmana(card):
+	var counter = 0
+	var tapCount = 0
+	while tapCount != int(card.cardData.cost):
+		var tempCard = mana.get_child(counter)
+		if tempCard.cardData['tapped']:
+			counter += 1
+			continue
+		tempCard.cardData['tapped'] = true
+		counter += 1
+		tapCount += 1
 
 func fight(one, two):
 	var green = one.cardData.power
@@ -118,7 +133,7 @@ func _input(event):
 	if Input.is_action_pressed('k'):
 		pass
 	if Input.is_action_pressed('p'):
-		coms.hide()
+		coms.rpc("changeTurn")
 	if Input.is_action_pressed('l'):
 		pass
 
@@ -159,4 +174,3 @@ func merge_dict(dict_1: Dictionary, dict_2: Dictionary, deep_merge: bool = false
 		else:
 			new_dict[key] = dict_2[key]
 	return new_dict
-

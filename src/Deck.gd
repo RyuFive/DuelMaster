@@ -14,4 +14,5 @@ func _process(delta):
 func _gui_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT and event.pressed:
-			root.drawCard(1)
+			pass
+#			root.drawCard(1)

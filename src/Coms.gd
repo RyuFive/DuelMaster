@@ -22,6 +22,7 @@ onready var chat_input = $RoomUI/ChatInput
 const PORT = 3000
 const MAX_USERS = 1 #not including host
 var peer
+var id
 var players_done = []
 
 func _ready():
@@ -37,6 +38,7 @@ func _server_disconnected():
 func user_entered(p2id):
 	root.peer = p2id
 	peer = p2id
+	id = get_tree().get_network_unique_id()
 	self.hide()
 	rpc_id(peer, 'preConfigureGame')
 
@@ -72,14 +74,20 @@ func leave_room():
 
 remote func preConfigureGame():
 	randomize()
+	if id == 1:
+		root.turn = true
+	if randi() % 2 == 0:
+		rpc("changeTurn")
 	var tempDeck = root.Deck.DATA.cards.duplicate(true)
 	tempDeck.shuffle()
 	for cardData in tempDeck:
-		deck.add_child(root.createCard(cardData, false, {'id': int(rand_range(1,10)*100000000)}))
+		deck.add_child(root.createCard(cardData, false, 
+		{'id': randi(), 'tapped':false}
+		))
 	rpc_id(peer, 'sendDeck', tempDeck)
 	get_tree().set_pause(true)
 	rpc_id(peer, "donePreconfiguring")
-	rpc_id(get_tree().get_network_unique_id(), "donePreconfiguring")
+	rpc_id(id, "donePreconfiguring")
 
 sync func donePreconfiguring():
 	var who = get_tree().get_rpc_sender_id()
@@ -92,6 +100,8 @@ sync func donePreconfiguring():
 
 remote func postConfigureGame():
 	get_tree().set_pause(false)
+	root.drawCard(5)
+	root.deck2shield(5)
 
 remote func sendDeck(tempDeck):
 	for cardData in tempDeck:
@@ -150,3 +160,16 @@ remote func loseMonster(cardData):
 		if str(card.cardData) == str(cardData):
 			grave.add_child(root.createCard(cardData))
 			card.queue_free()
+
+sync func changeTurn():
+	root.turn = !root.turn
+	if root.turn:
+		root.drawCard(1)
+		for card in mana.get_children():
+			card.cardData['tapped'] = false
+		for card in monster.get_children():
+			card.cardData['tapped'] = false
+	
+	
+	
+	
