@@ -1,8 +1,9 @@
-extends Node2D
+extends Control
 
 # Preparing Nodes
 onready var CardDatabase = preload("res://data/CardDatabase.gd")
 const CardBase = preload("res://scenes/CardBase.tscn")
+const CardViewer = preload("res://scenes/CardViewer.tscn")
 const Deck = preload("res://data/decks/sample_deck.gd")
 onready var deck = get_node("Deck1/Deck")
 onready var shield = get_node("Shield1/Shield")
@@ -24,9 +25,13 @@ onready var coms = get_node("Coms")
 var Deck1
 var Deck2
 var peer
-var turn = false
+var manaPerTurn = false
+var turn = true
+var turnCount = 1
+var attackStarted = false
 
 func drawCard(num):
+	yield(get_tree().create_timer(0.001), "timeout")
 	for i in num:
 		var card = deck.get_child(i)
 		if hand.get_child_count() >= 9:
@@ -35,10 +40,11 @@ func drawCard(num):
 		else:
 			hand.add_child(createCard(card.cardData, true))
 			coms.rpc_id(peer, 'addHand', card.cardData)
-		coms.rpc_id(peer, 'deckMil')
 		card.queue_free()
+	coms.rpc_id(peer, 'deckMil', num)
 
 func deck2shield(num):
+	yield(get_tree().create_timer(0.001), "timeout")
 	for i in num:
 		var shieldGrid = get_node("/root/Playspace/Shield1/ShieldGrid")
 		var card = deck.get_child(i)
@@ -51,10 +57,11 @@ func deck2shield(num):
 			var shieldTexture = TextureRect.new()
 			shieldTexture.texture = load("res://assets/zone/shield.png")
 			shieldGrid.add_child(shieldTexture)
-		coms.rpc_id(peer, 'deckMil')
 		card.queue_free()
+	coms.rpc_id(peer, 'deckMil', num)
 
 func hand2mana(card):
+	manaPerTurn = true
 	coms.rpc_id(peer, 'handMil', card.cardData)
 	mana.add_child(createCard(card.cardData))
 	for civ in card.cardData.civilizations:
@@ -63,10 +70,12 @@ func hand2mana(card):
 	card.queue_free()
 
 func hand2monster(card):
-	monster.add_child(createCard(card.cardData, true))
 	coms.rpc_id(peer, 'addMonster', card.cardData)
+	monster.add_child(createCard(card.cardData, true, {'sickness' : true}))
 	coms.rpc_id(peer, 'handMil', card.cardData)
 	card.queue_free()
+	if card.cardData.name == 'Aqua Hulcus':
+		drawCard(1)
 
 func hand2grave(card):
 	grave.add_child(createCard(card.cardData))
@@ -75,19 +84,26 @@ func hand2grave(card):
 	card.queue_free()
 	
 func monster2grave(card):
-	grave.add_child(createCard(card.cardData))
-	coms.rpc_id(peer, 'addGrave', card.cardData)
+	if card.cardData.name == 'Aqua Knight':
+		hand.add_child(createCard(card.cardData, true))
+		coms.rpc_id(peer, 'addHand', card.cardData)
+	else:
+		grave.add_child(createCard(card.cardData))
+		coms.rpc_id(peer, 'addGrave', card.cardData)
 	coms.rpc_id(peer, 'removeMonster', card.cardData)
 	card.queue_free()
 
-func shield2grave():
-	var card = shield2.get_child(0)
-	coms.rpc_id(peer, 'loseShield', card.cardData)
+func shieldbreak(card):
+	var tempShield = shield2.get_child(0)
+	var shieldGrid2 = get_node("/root/Playspace/Shield2/ShieldGrid")
+	shieldGrid2.remove_child(shieldGrid2.get_child(0))
+	coms.rpc_id(peer, 'loseShield', tempShield.cardData)
 	if hand2.get_child_count() < 9:
-		hand2.add_child(createCard(card.cardData, true, {'flipped': true}))
+		hand2.add_child(createCard(tempShield.cardData, true, {'flipped': true}))
 	else:
-		grave2.add_child(createCard(card.cardData))
-	card.queue_free()
+		grave2.add_child(createCard(tempShield.cardData))
+	tempShield.queue_free()
+	coms.rpc_id(peer, 'tapMonster', card.cardData)
 
 func tapmana(card):
 	var counter = 0
@@ -97,9 +113,14 @@ func tapmana(card):
 		if tempCard.cardData['tapped']:
 			counter += 1
 			continue
+		coms.rpc_id(peer, 'tapMana', tempCard.cardData)
 		tempCard.cardData['tapped'] = true
 		counter += 1
 		tapCount += 1
+
+func evolve(evolution, card):
+	# remember to factor in spiral gate
+	pass
 
 func fight(one, two):
 	var green = one.cardData.power
@@ -107,12 +128,15 @@ func fight(one, two):
 	if green > red:
 		coms.rpc_id(peer, 'loseMonster', two.cardData)
 		grave2.add_child(createCard(two.cardData))
+		coms.rpc_id(peer, 'tapMonster', one.cardData)
 		two.queue_free()
 	elif green < red:
 		monster2grave(one)
+		coms.rpc_id(peer, 'removeMonster', one.cardData)
 	elif green == red:
 		monster2grave(one)
 		coms.rpc_id(peer, 'loseMonster', two.cardData)
+		coms.rpc_id(peer, 'removeMonster', one.cardData)
 		grave2.add_child(createCard(two.cardData))
 		two.queue_free()
 
@@ -122,10 +146,23 @@ func createCard(cardData : Dictionary, vis = false, extra = {}):
 	new_card.visible = vis
 	return(new_card)
 
+func endTurn():
+	for card in mana2.get_children():
+		card.cardData['tapped'] = false
+	for card in monster2.get_children():
+		card.cardData['sickness'] = false
+	coms.rpc("changeTurn")
+
 func _on_ExitButton_gui_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT and event.pressed:
 			get_tree().quit()
+
+func _on_EndTurnButton_gui_input(event):
+	if event is InputEventMouseButton:
+		if event.button_index == BUTTON_LEFT and event.pressed:
+			if turn:
+				endTurn()
 
 func _input(event):
 	if Input.is_action_pressed("quit"):

@@ -20,3 +20,5 @@ margin_right = 0.0
 margin_bottom = 0.0
 
 [node name="Graveyard" type="Node" parent="."]
+
+[connection signal="gui_input" from="GraveButton" to="." method="_on_GraveButton_gui_input"]

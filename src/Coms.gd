@@ -1,5 +1,6 @@
 extends Control
 
+const supported = preload("res://data/Supported.gd")
 const CardBase = preload("res://scenes/CardBase.tscn")
 onready var root = get_node("/root/Playspace")
 onready var deck = get_node("/root/Playspace/Deck1/Deck")
@@ -23,6 +24,7 @@ const PORT = 3000
 const MAX_USERS = 1 #not including host
 var peer
 var id
+var first_turn = false
 var players_done = []
 
 func _ready():
@@ -74,15 +76,14 @@ func leave_room():
 
 remote func preConfigureGame():
 	randomize()
-	if id == 1:
-		root.turn = true
-	if randi() % 2 == 0:
-		rpc("changeTurn")
+	$'../PlayerID'.text = str(id)
 	var tempDeck = root.Deck.DATA.cards.duplicate(true)
 	tempDeck.shuffle()
 	for cardData in tempDeck:
+		if !supported.DATA.has(cardData.name):
+			print("Add support for ", cardData.name)
 		deck.add_child(root.createCard(cardData, false, 
-		{'id': randi(), 'tapped':false}
+		{'id': randi(), 'tapped' : false, 'sickness' : false}
 		))
 	rpc_id(peer, 'sendDeck', tempDeck)
 	get_tree().set_pause(true)
@@ -100,8 +101,18 @@ sync func donePreconfiguring():
 
 remote func postConfigureGame():
 	get_tree().set_pause(false)
-	root.drawCard(5)
-	root.deck2shield(5)
+	yield(get_tree().create_timer(0.2), "timeout")
+	if id == 1:
+		if randi() % 2 == 0:
+			rpc("changeTurn", peer)
+		else:
+			root.turn = false
+			first_turn = true
+			$'../EndTurn'.visible = false
+			rpc("changeTurn")
+			
+	yield(root.drawCard(5), "completed")
+	yield(root.deck2shield(5), "completed")
 
 remote func sendDeck(tempDeck):
 	for cardData in tempDeck:
@@ -118,15 +129,16 @@ remote func handMil(cardData):
 remote func addGrave(cardData):
 	grave2.add_child(root.createCard(cardData))
 
-remote func deckMil():
-	deck2.get_child(0).queue_free()
+remote func deckMil(num = 1):
+	for i in num:
+		deck2.get_child(i).queue_free()
 
 remote func addMana(cardData):
 	mana2.add_child(root.createCard(cardData))
 
 remote func removeMana(cardData):
 	for card in mana2.get_children():
-		if str(card.cardData) == str(cardData):
+		if card.cardData.id == cardData.id:
 			card.queue_free()
 
 remote func addShield(cardData):
@@ -148,28 +160,60 @@ remote func loseShield(cardData):
 	card.queue_free()
 
 remote func addMonster(cardData):
-	monster2.add_child(root.createCard(cardData, true))
+	monster2.add_child(root.createCard(cardData, true, {'sickness' : true}))
 
 remote func removeMonster(cardData):
 	for card in monster2.get_children():
-		if str(card.cardData) == str(cardData):
+		if card.cardData.id == cardData.id:
 			card.queue_free()
 
 remote func loseMonster(cardData):
 	for card in monster.get_children():
-		if str(card.cardData) == str(cardData):
-			grave.add_child(root.createCard(cardData))
+		if card.cardData.id == cardData.id:
+			if card.cardData.name == 'Aqua Knight':
+				hand.add_child(root.createCard(cardData, true))
+			else:
+				grave.add_child(root.createCard(cardData))
 			card.queue_free()
 
-sync func changeTurn():
+remote func tapMana(cardData):
+	for card in mana2.get_children():
+		if card.cardData.id == cardData.id:
+			card.cardData['tapped'] = true
+
+remote func untapMana(cardData):
+	for card in mana2.get_children():
+		if card.cardData.id == cardData.id:
+			card.cardData['tapped'] = false
+			
+remote func tapMonster(cardData):
+	for card in monster2.get_children():
+		if card.cardData.id == cardData.id:
+			card.cardData['tapped'] = true
+
+remote func untapMonster(cardData):
+	for card in monster2.get_children():
+		if card.cardData.id == cardData.id:
+			card.cardData['tapped'] = false
+
+sync func changeTurn(p2id = 2):
+	if p2id == id:
+		root.turn = false
+		first_turn = true
+		$'../EndTurn'.visible = false
+		
+	$'../EndTurn'.visible = !$'../EndTurn'.visible
 	root.turn = !root.turn
 	if root.turn:
-		root.drawCard(1)
+		root.attackStarted = false
+		root.manaPerTurn = false
+		if !first_turn:
+			root.drawCard(1)
 		for card in mana.get_children():
 			card.cardData['tapped'] = false
 		for card in monster.get_children():
+			card.cardData['sickness'] = false
 			card.cardData['tapped'] = false
-	
-	
-	
-	
+			rpc_id(peer, 'untapMonster', card.cardData)
+		root.turnCount += 1
+		first_turn = false

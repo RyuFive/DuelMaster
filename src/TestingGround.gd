@@ -32,9 +32,19 @@ const monster = {
 func _ready():
 #	int(rand_range(1,10)*100000000)
 #	print('Fire' in civ.civilizations)
-	print(randi() % 2)
-	print("Gladiator" in civ)
+#	yield(sum(), "completed") # waiting for the countdown() function to complete
+#	print(randi() % 2)
+#	print("Gladiator" in civ)
+#	print('Ready')
+	print(self.name)
+	$Node2.testFunc()
+
 	pass
+
+func sum():
+	yield(get_tree().create_timer(0.001), "timeout")
+	print('c')
+	return self
 
 func merge_array(array_1: Array, array_2: Array, deep_merge: bool = false) -> Array:
 	var new_array = array_1.duplicate(true)

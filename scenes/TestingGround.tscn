@@ -1,6 +1,44 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://src/TestingGround.gd" type="Script" id=1]
 
-[node name="Node" type="Node"]
+[sub_resource type="GDScript" id=1]
+script/source = "extends Node
+
+onready var root = get_node(\"/root/Playspace\")
+onready var viewer = get_node(\"/root/Playspace/Viewer\")
+onready var coms = get_node(\"/root/PlayspaceComs\")
+
+onready var deck = get_node(\"/root/Playspace/Deck1/Deck\")
+onready var shield = get_node(\"/root/Playspace/Shield1/Shield\")
+onready var mana = get_node(\"/root/Playspace/Mana1/Mana\")
+onready var grave = get_node(\"/root/Playspace/Grave1/Graveyard\")
+onready var monster = get_node(\"/root/Playspace/Monster1/Cards\")
+onready var hand = get_node(\"/root/Playspace/Hand1/Cards\")
+
+onready var deck2 = get_node(\"/root/Playspace/Deck2/Deck\")
+onready var shield2 = get_node(\"/root/Playspace/Shield2/Shield\")
+onready var mana2 = get_node(\"/root/Playspace/Mana2/Mana\")
+onready var grave2 = get_node(\"/root/Playspace/Grave2/Graveyard\")
+onready var monster2 = get_node(\"/root/Playspace/Monster2/Cards\")
+onready var hand2 = get_node(\"/root/Playspace/Hand2/Cards\")
+
+func testFunc():
+	print(self.name)
+
+func onSummon(cardData):
+	var name = cardData.name
+	if name == 'Aqua Hulcus':
+		root.drawCard(1)
+
+func onDestroy(cardData):
+	var name = cardData.name
+	if name == 'Aqua Knight':
+		root.drawCard(1)
+"
+
+[node name="Node1" type="Node"]
 script = ExtResource( 1 )
+
+[node name="Node2" type="Node" parent="."]
+script = SubResource( 1 )

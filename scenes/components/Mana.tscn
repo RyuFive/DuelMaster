@@ -1,8 +1,13 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://src/Mana.gd" type="Script" id=1]
 [ext_resource path="res://scenes/components/CardNumber.tscn" type="PackedScene" id=2]
 [ext_resource path="res://assets/card/Duel_Masters_cardback.png" type="Texture" id=3]
+[ext_resource path="res://assets/zone/Light-smaller.png" type="Texture" id=4]
+[ext_resource path="res://assets/zone/Water-smaller.png" type="Texture" id=5]
+[ext_resource path="res://assets/zone/Darkness-smaller.png" type="Texture" id=6]
+[ext_resource path="res://assets/zone/Fire-smaller.png" type="Texture" id=7]
+[ext_resource path="res://assets/zone/Nature-smaller.png" type="Texture" id=8]
 
 [node name="Mana" type="Control"]
 script = ExtResource( 1 )
@@ -13,10 +18,53 @@ margin_bottom = 248.0
 texture_normal = ExtResource( 3 )
 expand = true
 
-[node name="ManaSize" parent="ManaButton" instance=ExtResource( 2 )]
+[node name="ManaTotal" parent="ManaButton" instance=ExtResource( 2 )]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_right = 0.0
 margin_bottom = 0.0
 
+[node name="ManaUntapped" parent="ManaButton" instance=ExtResource( 2 )]
+anchor_top = -0.213
+anchor_bottom = -0.213
+
+[node name="Grid" type="GridContainer" parent="ManaButton"]
+margin_left = -67.0
+margin_top = 1.0
+margin_right = -2.0
+margin_bottom = 183.0
+custom_constants/vseparation = 8
+
+[node name="Light" type="TextureRect" parent="ManaButton/Grid"]
+visible = false
+margin_right = 65.0
+margin_bottom = 30.0
+texture = ExtResource( 4 )
+
+[node name="Water" type="TextureRect" parent="ManaButton/Grid"]
+visible = false
+margin_right = 65.0
+margin_bottom = 30.0
+texture = ExtResource( 5 )
+
+[node name="Darkness" type="TextureRect" parent="ManaButton/Grid"]
+visible = false
+margin_right = 65.0
+margin_bottom = 30.0
+texture = ExtResource( 6 )
+
+[node name="Fire" type="TextureRect" parent="ManaButton/Grid"]
+visible = false
+margin_right = 41.0
+margin_bottom = 30.0
+texture = ExtResource( 7 )
+
+[node name="Nature" type="TextureRect" parent="ManaButton/Grid"]
+visible = false
+margin_right = 41.0
+margin_bottom = 30.0
+texture = ExtResource( 8 )
+
 [node name="Mana" type="Node" parent="."]
+
+[connection signal="gui_input" from="ManaButton" to="." method="_on_ManaButton_gui_input"]

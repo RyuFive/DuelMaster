@@ -1,6 +1,12 @@
 extends Control
 
-onready var grid = $Panel/Grid
+onready var grid = $Panel/Scroll/Grid
+var label = ''
 
-func _on_TouchCapture_gui_input(event):
-	self.queue_free()
+func _process(delta):
+	$Panel/Label.text = label
+
+func _on_BG_gui_input(event):
+	if event is InputEventMouseButton:
+		if event.button_index == BUTTON_LEFT and event.pressed:
+			self.queue_free()
